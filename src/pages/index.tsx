@@ -1,8 +1,35 @@
 import { Button, Flex, Stack } from "@chakra-ui/react";
+import { yupResolver } from "@hookform/resolvers/yup";
 import Head from "next/head";
+import { SubmitHandler, useForm } from "react-hook-form";
+import * as yup from "yup";
 import Input from "../components/form/Input";
 
+type SignInFormData = {
+  email: string;
+  password: string;
+};
+
+const signInFormSchema = yup.object().shape({
+  email: yup
+    .string()
+    .required("E-mail obrigatório")
+    .email("E-mail deve ser válido"),
+  password: yup.string().required("Senha obrigatória"),
+});
+
 export default function SignIn() {
+  const { register, handleSubmit, formState } = useForm({
+    resolver: yupResolver(signInFormSchema),
+  });
+
+  console.log(formState.errors);
+
+  const handleSignIn: SubmitHandler<SignInFormData> = async (value) => {
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+    console.log(value);
+  };
+
   return (
     <>
       <Head>
@@ -20,19 +47,35 @@ export default function SignIn() {
           p="8"
           borderRadius={8}
           flexDir="column"
+          onSubmit={handleSubmit(handleSignIn)}
         >
           <Stack spacing="4">
-            <Input name="email" id="email" type="email" label="E-mail" />
+            <Input
+              name="email"
+              id="email"
+              type="email"
+              label="E-mail"
+              error={formState.errors.email}
+              {...register("email")}
+            />
 
             <Input
               name="password"
               id="password"
               type="password"
               label="Senha"
+              error={formState.errors.password}
+              {...register("password")}
             />
           </Stack>
 
-          <Button type="submit" mt="6" colorScheme="pink" size="lg">
+          <Button
+            type="submit"
+            mt="6"
+            colorScheme="pink"
+            size="lg"
+            isLoading={formState.isSubmitting}
+          >
             Entrar
           </Button>
         </Flex>
